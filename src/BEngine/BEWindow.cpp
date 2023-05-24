@@ -6,17 +6,17 @@
 BE_BEGIN
 
 BEWindow::BEWindow(uint32 W, uint32 H, const String& Name)
-	:Width(W), Height(H)
+	:width(W), height(H)
 {
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	Window = glfwCreateWindow(Width, Height, Name.c_str(), nullptr, nullptr);
+	window = glfwCreateWindow(width, height, Name.c_str(), nullptr, nullptr);
 }
 
 BEWindow::~BEWindow()
 {
-	glfwDestroyWindow(Window);
+	glfwDestroyWindow(window);
 }
 
 BE_END

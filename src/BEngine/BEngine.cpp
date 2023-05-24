@@ -3,6 +3,6 @@
 
 BE_BEGIN
 
-BEngine* BEngine::Engine = nullptr;
+BEngine* BEngine::engine = nullptr;
 
 BE_END

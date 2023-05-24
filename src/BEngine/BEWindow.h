@@ -13,10 +13,10 @@ public:
 
 	~BEWindow();
 
-	uint32 Width;
-	uint32 Height;
+	uint32 width;
+	uint32 height;
 
-	GLFWwindow* Window;
+	GLFWwindow* window;
 };
 
 BE_END

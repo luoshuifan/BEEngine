@@ -12,7 +12,7 @@ public:
 	}
 
 private:
-	static BEngine* Engine;
+	static BEngine* engine;
 };
 
 BE_END

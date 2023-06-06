@@ -2,7 +2,7 @@
 #include "BEPch.h"
 //BE ÷’—…÷Æ º
 
-#define BE_BEGIN namespace{
+#define BE_BEGIN namespace BE{
 #define BE_END }
 
 using int32 = int32_t;

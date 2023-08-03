@@ -22,3 +22,10 @@ x64/Debug/RenderGraphBuilder.obj
 x64/Debug/main.obj
 x64/Debug/vc143.idb
 x64/Debug/vc143.pdb
+
+# Xmake cache
+.xmake/
+build/
+
+# MacOS Cache
+.DS_Store

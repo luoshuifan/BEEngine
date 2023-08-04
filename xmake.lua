@@ -6,6 +6,7 @@ target("cudalib")
     add_files("lib/static/cudalib/src/*.cpp")
 	
 	add_headerfiles("lib/static/cudalib/inc/*.h")
+	add_headerfiles("third_lib/stb/*.h")
     add_includedirs("lib/static/cudalib/inc")
 
     -- generate relocatable device code for device linker of dependents.

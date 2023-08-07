@@ -1,10 +1,12 @@
 #include "..\..\lib\static\cudalib\inc\Test.h"
+#include "..\..\include\Core\BELog.h"
 #include <iostream>
 
 int main()
 {
-	QueryDevice();
+	//QueryDevice();
 
-	int a = 0;
-	std::cin >> a;
+	TestSDFGen();
+
+	BE::BEPrint("END--------------------------");
 }

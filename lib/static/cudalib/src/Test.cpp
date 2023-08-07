@@ -21,6 +21,7 @@
 #include <string>
 
 #include "Test.h"
+#include "SDFGens.h"
 
 void QueryDevice() 
 {
@@ -290,4 +291,15 @@ void QueryDevice()
   printf("%s", sProfileString.c_str());
 
   printf("Result = PASS\n");
+}
+
+void TestSDFGen()
+{
+    FSDFGen* SDFGen = nullptr;
+
+    SDFGen = new FSDFGenSsedt();
+
+    SDFGen->GenerateSDF();
+
+    delete SDFGen;
 }

@@ -16,3 +16,5 @@ using uint8 = uint8_t;
 
 using String = std::string;
 
+
+const String PROJECT_DIR = String(PROJECTDIR);

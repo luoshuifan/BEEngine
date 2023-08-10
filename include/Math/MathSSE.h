@@ -8,6 +8,16 @@ BE_BEGIN
 
 struct SSE
 {
+	static float pfirst(const __m128& x)
+	{
+		return x.m128_f32[0];
+	}
+
+	static double pfirst(const __m128d& x)
+	{
+		return x.m128d_f64[0];
+	}
+
 	static float InvSqrt(float InValue)
 	{
 		const __m128 One = _mm_set_ss(1.0f);
@@ -28,6 +38,16 @@ struct SSE
 		double temp;
 		_mm_store_sd(&temp, R0);
 		return temp;
+	}
+
+	static float Sqrt(float& x)
+	{
+		return pfirst(__m128(_mm_sqrt_ss(_mm_set_ss(x))));
+	}
+
+	static double Sqrt(double& x)
+	{
+		return pfirst(__m128d(_mm_sqrt_pd(_mm_set_sd(x))));
 	}
 };
 

@@ -1,8 +1,17 @@
 #pragma once
 #include "..\Core\BE.h"
-#include "..\Math\Math.h"
+#include "..\Math\MathFwd.h"
+#include "..\Math\Point.h"
+#include "..\Math\Vector.h"
+#include "..\Math\Ray.h"
+
 
 BE_BEGIN
+
+struct FIntersectProperty
+{
+
+};
 
 class Geometry
 {
@@ -44,7 +53,7 @@ public:
 		HalfHeight = 1.0f;
 	}
 
-	void RayCast(const FRay& Ray, float& t) const;
+	bool RayCast(const FRay& Ray, float& t, FIntersectProperty& Property) const;
 
 	bool RayCast(const FRay& Ray) const;
 private:
@@ -63,5 +72,9 @@ private:
 	//h
 	float HalfHeight;
 };
+
+#if BE_DEBUG
+void FTaperedCylinderTest();
+#endif
 
 BE_END

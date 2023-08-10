@@ -1,5 +1,6 @@
 add_rules("mode.debug", "mode.release")
 add_defines("PROJECTDIR=\"$(projectdir)\"")
+add_defines("BE_DEBUG")
 set_languages("clatest", "c++latest")
 	
 target("cudalib")
@@ -8,6 +9,7 @@ target("cudalib")
     add_files("lib/static/cudalib/src/*.cpp")
 	
 	add_headerfiles("lib/static/cudalib/inc/*.h")
+	add_headerfiles("lib/static/cudalib/inc/*.cuh")
 	add_headerfiles("third_lib/stb/*.h")
     add_includedirs("lib/static/cudalib/inc")
 	

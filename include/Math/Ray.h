@@ -4,6 +4,10 @@
 #include "Point.h"
 #include "Vector.h"
 
+#if BE_DEBUG
+#include "..\Core\BELog.h"
+#endif
+
 BE_BEGIN
 
 template<typename T>
@@ -36,6 +40,22 @@ public:
 		Direction = TVector<T>(0, 0, 1);
 	}
 
+#if BE_DEBUG
+	template<typename U>
+	friend std::ostream& operator<<(std::ostream& out, const TRay<U>& Ray);
+#endif
 };
+
+
+#if BE_DEBUG
+
+template<typename U>
+std::ostream& operator<<(std::ostream& out, const TRay<U>& Ray)
+{
+	BEPrint("Origine", Ray.Origine, "Direction", Ray.Direction);
+	return out;
+}
+
+#endif
 
 BE_END

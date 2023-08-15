@@ -3,3 +3,5 @@
 void QueryDevice();
 
 void TestSDFGen();
+
+void FTTest();

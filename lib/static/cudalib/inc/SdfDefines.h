@@ -9,8 +9,12 @@ enum class ESDFWorker : uint8_t
 
 struct FPoint
 {
-	int32_t dx;
-	int32_t dy;
+	int32_t dx = 0;
+	int32_t dy = 0;
+
+	float Alpha = 0;
+	float ddx = 0;
+	float ddy = 0;
 
 	int32_t DistanceSq() const
 	{

@@ -28,6 +28,9 @@ target("cudalib")
     -- add_cugencodes("compute_30")
     
 	set_policy("build.cuda.devlink", true)
+	
+	add_files("third_lib/freetype-2.13.1/build/Debug/freetyped.lib")
+	add_includedirs("third_lib/freetype-2.13.1/build/include/freetype2")
 
 target("BEEngine")
     set_kind("binary")
@@ -50,3 +53,4 @@ target("BEEngine")
     add_headerfiles("lib/static/cudalib/inc/*.h")
 	
 	add_deps("cudalib")
+	

@@ -13,15 +13,23 @@ const std::string FileName = std::string(PROJECTDIR) + "/resource/sdf/7.thumb.pn
 const std::string OutFileName = std::string(PROJECTDIR) + "/resource/sdf/7inside.png";
 const std::string OutSDFFileName = std::string(PROJECTDIR) + "/resource/sdf/SDF.png";
 
+static const std::string AAFileName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32.png";
+static const std::string AAFileOutName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32_Re.png";
+static const std::string AAFileSDFName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32_SDF.png";
+
+constexpr int32_t PIXEL_MIDDLE_SIZE = 5;
+
 void FSDFGenSsedt::GenerateSDF() const
 {
+	std::string TextureName = AAFileName;
+
 	int Width, Height;
 	int Channels;
 	unsigned char* TextureData = 
-		stbi_load(FileName.c_str(), &Width, &Height, &Channels, 0);
+		stbi_load(TextureName.c_str(), &Width, &Height, &Channels, 0);
 
 	if (!TextureData)
-		std::cout << "texture " << FileName << " read fail" << std::endl;
+		std::cout << "texture " << TextureName << " read fail" << std::endl;
 
 	FGrid GridOut{ Width, Height };
 	FGrid GridInside{ Width, Height};
@@ -103,20 +111,37 @@ void FSDFGenSsedt::FillGrid(
 		{
 			int32_t Position = Y * Width + X;
 
-			uint8_t RChannel = (*(TextureData + Position * Channels + 0));
+			uint8_t RChannel = *(TextureData + Position * Channels + 0);
 			uint8_t GChannel = *(TextureData + Position * Channels + 1);
 			uint8_t BChannel = *(TextureData + Position * Channels + 2);
 
-			if (RChannel < 127)
+			if (RChannel < PIXEL_MIDDLE_SIZE)
 			{
 				GridInside.Put(Position, PointZero);
 				GridOut.Put(Position, PointInf);
 			}
-			else
+			else if (RChannel > 255 - PIXEL_MIDDLE_SIZE)
 			{
 				GridInside.Put(Position, PointInf);
 				GridOut.Put(Position, PointZero);
 			}
+			else
+			{
+				FPoint Point;
+				Point.Alpha = RChannel;
+				//GridInside.Put(Position, FPoint())
+			}
+
+			//if (RChannel < 127)
+			//{
+			//	GridInside.Put(Position, PointZero);
+			//	GridOut.Put(Position, PointInf);
+			//}
+			//else
+			//{
+			//	GridInside.Put(Position, PointInf);
+			//	GridOut.Put(Position, PointZero);
+			//}
 		}
 	}
 }
@@ -171,4 +196,18 @@ void FSDFGenSsedt::FillGridDistances(
 		}
 
 	}
+}
+
+void GetIsotropicSobel(
+	const unsigned char* TextureData,
+	int32_t X,
+	int32_t Y,
+	int32_t Width,
+	int32_t Height,
+	FPoint& Point
+)
+{
+
+
+
 }

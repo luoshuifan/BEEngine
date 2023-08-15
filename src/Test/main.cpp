@@ -8,6 +8,9 @@ int main()
 	//QueryDevice();
 
 	//TestSDFGen();
-	BE::FTaperedCylinderTest();
+
+	//BE::FTaperedCylinderTest();
+	
+	FTTest();
 	BE::BEPrint("END--------------------------");
 }

@@ -34,3 +34,12 @@ private:
 		int32_t Width,
 		int32_t Height) const;
 };
+
+void GetIsotropicSobel(
+	const unsigned char* TextureData,
+	int32_t X,
+	int32_t Y,
+	int32_t Width,
+	int32_t Height,
+	FPoint& Point
+);

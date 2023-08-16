@@ -2,7 +2,21 @@ add_rules("mode.debug", "mode.release")
 add_defines("PROJECTDIR=\"$(projectdir)\"")
 add_defines("BE_DEBUG")
 set_languages("clatest", "c++latest")
+
+target("texturelib")
+    set_kind("static")
+	add_headerfiles("lib/static/texturelib/include/*.h")
+	add_files("lib/static/texturelib/src/*.cpp")
+
+	add_headerfiles("third_lib/stb/*.h")
 	
+    add_files("third_lib/lpng1639/build/Debug/libpng16d.lib")	
+	add_files("third_lib/zlib-1.2.13/build/lib_output/Debug/zlibd.lib")	
+	add_files("third_lib/freetype-2.13.1/build/Debug/freetyped.lib")
+	add_includedirs("third_lib/freetype-2.13.1/build/include/freetype2")
+	
+	add_includedirs("lib/static/texturelib/include")
+
 target("cudalib")
     set_kind("static")
     add_files("lib/static/cudalib/src/*.cu")
@@ -29,8 +43,18 @@ target("cudalib")
     
 	set_policy("build.cuda.devlink", true)
 	
+	add_files("third_lib/lpng1639/build/Debug/libpng16d.lib")
+	--add_includedirs("third_lib/lpng1639/build/include")
+	
+	add_files("third_lib/zlib-1.2.13/build/lib_output/Debug/zlibd.lib")
+	--add_includedirs("third_lib/lpng1639/build/include")	
+	
 	add_files("third_lib/freetype-2.13.1/build/Debug/freetyped.lib")
 	add_includedirs("third_lib/freetype-2.13.1/build/include/freetype2")
+	add_includedirs("lib/static/texturelib/include")
+	add_includedirs("lib/static/cudalib/inc")
+	
+	add_deps("texturelib")
 
 target("BEEngine")
     set_kind("binary")
@@ -50,7 +74,8 @@ target("BEEngine")
 	
 	set_pcxxheader("include/pch/BEPch.h")
 	
-    add_headerfiles("lib/static/cudalib/inc/*.h")
+	add_includedirs("include")
+	add_includedirs("lib/static/cudalib/inc")
 	
 	add_deps("cudalib")
 	

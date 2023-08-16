@@ -310,19 +310,8 @@ void FTTest()
     std::string FontPath =
         "F:\\Cplusplus\\BEEngine\\third_lib\\freetype-2.13.1\\build\\Fonts\\STKAITI.TTF";
 
-	FT_Library Library;
-    FT_Error LibraryError = FT_Init_FreeType(&Library);
-    
-    FT_Face Face;
-    FT_Error FaceError = FT_New_Face(Library, FontPath.c_str(), 0, &Face);
+    BEFreeType FT(FontPath);
+    FT.GetGlyphBitMap('A');
 
-    if (FaceError == FT_Err_Unknown_File_Format)
-    {
-
-    }
-    else if (FaceError)
-    {
-
-    }
 
 }

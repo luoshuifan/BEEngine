@@ -16,5 +16,11 @@ using uint8 = uint8_t;
 
 using String = std::string;
 
+#define PRO R"(F:\Cplusplus\BEEngine)"
+static const String PROJECT_DIR = PROJECTDIR;
 
-static const String PROJECT_DIR = String(PROJECTDIR);
+inline String PROJECTDIRPLUS(const String& Str)
+{
+	String Dir = PRO;
+	return Dir + Str;
+}

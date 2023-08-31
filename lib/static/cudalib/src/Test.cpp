@@ -24,6 +24,8 @@
 #include "SDFGens.h"
 #include "BEFreeType.h"
 
+BE_BEGIN
+
 void QueryDevice() 
 {
 
@@ -300,18 +302,24 @@ void TestSDFGen()
 
     SDFGen = new FSDFGenSsedt();
 
-    SDFGen->GenerateSDF();
+    SDFGen->GenerateSDF(BEBitMap());
 
     delete SDFGen;
 }
 
 void FTTest()
 {
-    std::string FontPath =
-        "F:\\Cplusplus\\BEEngine\\third_lib\\freetype-2.13.1\\build\\Fonts\\STKAITI.TTF";
+    BEFreeType FT;
+    BEBitMap BitMap = FT.GetGlyphBitMap('A');
 
-    BEFreeType FT(FontPath);
-    FT.GetGlyphBitMap('A');
+    String TextureSavePath = PROJECT_DIR + "\\resource\\sdf\\A.png";
+    BitMap.Save(TextureSavePath);
 
+    FSDFGen* SDFGen = nullptr;
+    SDFGen = new FSDFGenSsedt();
+    SDFGen->GenerateSDF(BitMap);
 
+    delete SDFGen;
 }
+
+BE_END

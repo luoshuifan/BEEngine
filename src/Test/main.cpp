@@ -1,7 +1,7 @@
-#include "..\..\lib\static\cudalib\inc\Test.h"
-#include "..\..\include\Core\BELog.h"
-#include "..\..\include\Geometry\Geometry.h"
+
 #include <iostream>
+#include "Core/BELog.h"
+#include "Test.h"
 
 int main()
 {
@@ -11,6 +11,6 @@ int main()
 
 	//BE::FTaperedCylinderTest();
 	
-	FTTest();
+	BE::FTTest();
 	BE::BEPrint("END--------------------------");
 }

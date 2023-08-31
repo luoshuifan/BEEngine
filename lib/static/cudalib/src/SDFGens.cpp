@@ -3,68 +3,78 @@
 #include <string>
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "..\..\..\..\third_lib\stb\stb_image.h"
+#include "BitMap.h"
+#include "Core\BEGramma.h"
+#include "Math\Math.h"
+#include "Math\MathDefine.h"
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "..\..\..\..\third_lib\stb\stb_image_write.h"
+BE_BEGIN
 
-const std::string FileName = std::string(PROJECTDIR) + "/resource/sdf/7.thumb.png";
-const std::string OutFileName = std::string(PROJECTDIR) + "/resource/sdf/7inside.png";
-const std::string OutSDFFileName = std::string(PROJECTDIR) + "/resource/sdf/SDF.png";
+const FPoint FPoint::PointZero{ 0,0, FPoint::EFlag::InSide};
+const FPoint FPoint::PointInf{ 1024, 1024, FPoint::EFlag::Out };
+constexpr int32 PIXEL_MIDDLE_SIZE = 5;
+void GetIsotropicSobel(
+	const unsigned char* TextureData,
+	int32 X,
+	int32 Y,
+	int32 Width,
+	int32 Height,
+	FPoint& Point
+);
+uint8 GetTextureData(
+	const unsigned char* TextureData,
+	int32 X,
+	int32 Y,
+	int32 Width,
+	int32 Height,
+	int32 XDelta,
+	int32 YDelta
+);
 
-static const std::string AAFileName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32.png";
-static const std::string AAFileOutName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32_Re.png";
-static const std::string AAFileSDFName = "F:\\Cplusplus\\BEEngine\\resource\\sdf\\Font_R2_Restore_32_SDF.png";
-
-constexpr int32_t PIXEL_MIDDLE_SIZE = 5;
-
-void FSDFGenSsedt::GenerateSDF() const
+void FSDFGenSsedt::GenerateSDF(const BEBitMap& BitMap) const
 {
-	std::string TextureName = AAFileName;
-
-	int Width, Height;
-	int Channels;
-	unsigned char* TextureData = 
-		stbi_load(TextureName.c_str(), &Width, &Height, &Channels, 0);
+	unsigned char* TextureData = BitMap.Buffer;
 
 	if (!TextureData)
-		std::cout << "texture " << TextureName << " read fail" << std::endl;
+		std::cout << "texture " << BitMap.Name << " read fail" << std::endl;
+
+	int32 Width = BitMap.Width;
+	int32 Height = BitMap.Height;
+	int32 Channels = BitMap.Channels;
 
 	FGrid GridOut{ Width, Height };
 	FGrid GridInside{ Width, Height};
 
 	FillGrid(GridOut, GridInside, TextureData, Width, Height, Channels);
-	
 	FillGridDistances(GridInside, Width, Height);
 	FillGridDistances(GridOut, Width, Height);
 
-	unsigned char* SDFTexture = new unsigned char[Width * Height * 4];
-	int32_t* SDFGrid = new int32_t[Width * Height];
-	int32_t MaxDistance = 0;
+	BEBitMap SDFBitMap(Width, Height, 4, "SDFTexture.png");
 
-	for (int32_t X = 0; X < Width; ++X)
-	{
-		for (int32_t Y = 0; Y < Height; ++Y)
+	unsigned char* SDFTexture = SDFBitMap.Buffer;
+	//int32_t* SDFGrid = new int32_t[Width * Height];
+	float SDFGrid[23 * 23];
+	float MaxDistance = 0;
+
+	Foreach(Width, Height, 
+		[&GridInside, &GridOut, &SDFGrid, &Width, &MaxDistance](int32 X, int32 Y)
 		{
 			int32_t Position = Y * Width + X;
 			FPoint PointInside = GridInside.Get(Position);
 			FPoint PointOut = GridOut.Get(Position);
 
-			int32_t SigDistance = PointInside.DistanceSq() - PointOut.DistanceSq();
+			float SigDistance = PointInside.DistanceSq() - PointOut.DistanceSq();
 			SDFGrid[Position] = SigDistance;
 			if (MaxDistance < SigDistance)
 			{
 				MaxDistance = SigDistance;
 			}
-		}
-	}
+		});
 	
 #if SDF_DEBUG
 	float MaxDistanceInv = 1.0f / MaxDistance;
-	for (int32_t X = 0; X < Width; ++X)
-	{
-		for (int32_t Y = 0; Y < Height; ++Y)
+	Foreach(Width, Height,
+		[&Width, &SDFGrid, &MaxDistanceInv, &SDFTexture](int32 X, int32 Y)
 		{
 			int32_t Position = Y * Width + X;
 			int32_t Distance = SDFGrid[Position];
@@ -75,116 +85,94 @@ void FSDFGenSsedt::GenerateSDF() const
 			SDFTexture[Position * 4 + 1] = DisplayDistance;
 			SDFTexture[Position * 4 + 2] = DisplayDistance;
 			SDFTexture[Position * 4 + 3] = 255;
-		}
-	}
+		});
 
-	stbi_write_png(OutSDFFileName.c_str(), Width, Height, 4, SDFTexture, 0);
+	SDFBitMap.Save(PROJECTDIRPLUS("/resource/sdf/"));
 
-	delete SDFTexture;
-	delete SDFGrid;
+	//delete[] SDFGrid;
 #endif
-
-#if SDF_DEBUG
-	unsigned char* TextureInside = new unsigned char[Width * Height * 4];
-
-	GridInside.ConvertPNG(4, TextureInside);
-
-	stbi_write_png(OutFileName.c_str(), Width, Height, 4, TextureInside, 0);
-
-	delete TextureInside;
-#endif
-
-	stbi_image_free(TextureData);
 }
 
 void FSDFGenSsedt::FillGrid(
 	FGrid& GridOut,
 	FGrid& GridInside, 
 	const unsigned char* TextureData, 
-	int32_t Width, 
-	int32_t Height,
-	int32_t Channels) const
+	int32 Width, 
+	int32 Height,
+	int32 Channels) const
 {
-	for (int32_t X = 0; X < Width; ++X)
+	auto Fill = [&](int32 X, int32 Y)
 	{
-		for (int32_t Y = 0; Y < Height; ++Y)
+		int32 Position = Y * Width + X;
+
+		uint8 Color = TextureData[Position];
+		if (Color == 255)
 		{
-			int32_t Position = Y * Width + X;
-
-			uint8_t RChannel = *(TextureData + Position * Channels + 0);
-			uint8_t GChannel = *(TextureData + Position * Channels + 1);
-			uint8_t BChannel = *(TextureData + Position * Channels + 2);
-
-			if (RChannel < PIXEL_MIDDLE_SIZE)
-			{
-				GridInside.Put(Position, PointZero);
-				GridOut.Put(Position, PointInf);
-			}
-			else if (RChannel > 255 - PIXEL_MIDDLE_SIZE)
-			{
-				GridInside.Put(Position, PointInf);
-				GridOut.Put(Position, PointZero);
-			}
-			else
-			{
-				FPoint Point;
-				Point.Alpha = RChannel;
-				//GridInside.Put(Position, FPoint())
-			}
-
-			//if (RChannel < 127)
-			//{
-			//	GridInside.Put(Position, PointZero);
-			//	GridOut.Put(Position, PointInf);
-			//}
-			//else
-			//{
-			//	GridInside.Put(Position, PointInf);
-			//	GridOut.Put(Position, PointZero);
-			//}
+			GridInside.Put(Position, FPoint::PointZero);
+			GridOut.Put(Position, FPoint::PointInf);
 		}
-	}
+		else if (Color == 0)
+		{
+			GridInside.Put(Position, FPoint::PointInf);
+			GridOut.Put(Position, FPoint::PointZero);
+		}
+		else
+		{
+			FPoint MidPoint;
+			MidPoint.Flag = FPoint::EFlag::Mid;
+			MidPoint.Area = Color / 255.0f;
+			GetIsotropicSobel(TextureData, X, Y, Width, Height, MidPoint);
+			GridInside.Put(Position, MidPoint);
+			GridOut.Put(Position, MidPoint);
+		}
+	};
+
+	Foreach(Width, Height, Fill);
 }
 
 void FSDFGenSsedt::FillGridDistances(
 	FGrid& Grid,
-	int32_t Width,
-	int32_t Height) const
+	int32 Width,
+	int32 Height) const
 {
-	for (int32_t X = 0; X < Width; ++X)
+	for (int32 X = 0; X < Width; ++X)
 	{
-		for (int32_t Y = 0; Y < Height; ++Y)
+		for (int32 Y = 0; Y < Height; ++Y)
 		{
-			int32_t Position = Y * Width + X;
+			int32 Position = Y * Width + X;
 			FPoint& Point = Grid.Get(Position);
+			int32 LeftX = FMath::Clamp(X - 1, 0, Width - 1);
+			int32 DownY = FMath::Clamp(Y - 1, 0, Height - 1);
 
-			Grid.Compare(Point, X, Y, -1, 0);
-			Grid.Compare(Point, X, Y, 0, -1);
-			Grid.Compare(Point, X, Y, -1, -1);
-			Grid.Compare(Point, X, Y, -1, 1);
+			Grid.Compare(Point, LeftX, Y, -1, 0);
+			Grid.Compare(Point, X, DownY, 0, -1);
+			Grid.Compare(Point, LeftX, DownY, -1, -1);
+			Grid.Compare(Point, LeftX, FMath::Clamp(Y + 1, 0, Height - 1), -1, 1);
 		}
 
-		for (int32_t Y = Height - 1; Y >= 0; --Y)
+		for (int32 Y = Height - 1; Y >= 0; --Y)
 		{
-			int32_t Position = Y * Width + X;
+			int32 Position = Y * Width + X;
 			FPoint& Point = Grid.Get(Position);
 
-			Grid.Compare(Point, X, Y, 0, 1);
+			Grid.Compare(Point, X, FMath::Clamp(Y + 1, 0, Height - 1), 0, 1);
 		}
 
 	}
 
-	for (int32_t X = Width - 1; X >= 0; --X)
+	for (int32 X = Width - 1; X >= 0; --X)
 	{
-		for (int32_t Y = Height -1 ; Y >= 0; --Y)
+		for (int32 Y = Height -1 ; Y >= 0; --Y)
 		{
-			int32_t Position = Y * Width + X;
+			int32 Position = Y * Width + X;
 			FPoint& Point = Grid.Get(Position);
+			int32 RightX = FMath::Clamp(X + 1, 0, Width - 1);
+			int32 UpY = FMath::Clamp(Y + 1, 0, Height - 1);
 
-			Grid.Compare(Point, X, Y, 1, 0);
-			Grid.Compare(Point, X, Y, 0, 1);
-			Grid.Compare(Point, X, Y, 1, 1);
-			Grid.Compare(Point, X, Y, 1, -1);
+			Grid.Compare(Point, RightX, Y, 1, 0);
+			Grid.Compare(Point, X, UpY, 0, 1);
+			Grid.Compare(Point, RightX, UpY, 1, 1);
+			Grid.Compare(Point, RightX, FMath::Clamp(Y - 1, 0, Height - 1), 1, -1);
 		}
 
 		for (int32_t Y = 0; Y < Height; ++Y)
@@ -192,7 +180,7 @@ void FSDFGenSsedt::FillGridDistances(
 			int32_t Position = Y * Width + X;
 			FPoint& Point = Grid.Get(Position);
 
-			Grid.Compare(Point, X, Y, 0, -1);
+			Grid.Compare(Point, X, FMath::Clamp(Y - 1, 0, Height - 1), 0, -1);
 		}
 
 	}
@@ -200,14 +188,44 @@ void FSDFGenSsedt::FillGridDistances(
 
 void GetIsotropicSobel(
 	const unsigned char* TextureData,
-	int32_t X,
-	int32_t Y,
-	int32_t Width,
-	int32_t Height,
+	int32 X,
+	int32 Y,
+	int32 Width,
+	int32 Height,
 	FPoint& Point
 )
 {
+	float DDX = -1 * GetTextureData(TextureData, X, Y, Width, Height, -1, 1) +
+		-BE_SQRT_TWO * GetTextureData(TextureData, X, Y, Width, Height, -1, 0) +
+		-1 * GetTextureData(TextureData, X, Y, Width, Height, -1, -1) +
+		1 * GetTextureData(TextureData, X, Y, Width, Height, 1, 1) +
+		BE_SQRT_TWO * GetTextureData(TextureData, X, Y, Width, Height, 1, 0) +
+		1 * GetTextureData(TextureData, X, Y, Width, Height, 1, -1);
 
+	float DDY = -1 * GetTextureData(TextureData, X, Y, Width, Height, -1, 1) +
+		-BE_SQRT_TWO * GetTextureData(TextureData, X, Y, Width, Height, 0, -1) +
+		-1 * GetTextureData(TextureData, X, Y, Width, Height, 1, 1) +
+		1 * GetTextureData(TextureData, X, Y, Width, Height, -1, -1) +
+		BE_SQRT_TWO * GetTextureData(TextureData, X, Y, Width, Height, 0, 1) +
+		1 * GetTextureData(TextureData, X, Y, Width, Height, 1, -1);
 
-
+	Point.ddx = DDX / 255;
+	Point.ddy = DDY / 255;
 }
+
+uint8 GetTextureData(
+	const unsigned char* TextureData,
+	int32 X,
+	int32 Y,
+	int32 Width,
+	int32 Height,
+	int32 XDelta,
+	int32 YDelta
+)
+{
+	X = FMath::Clamp(X + XDelta, 0, Width);
+	Y = FMath::Clamp(Y + YDelta, 0, Height);
+	return TextureData[Y * Width + X];
+}
+
+BE_END

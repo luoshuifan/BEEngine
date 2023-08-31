@@ -1,6 +1,7 @@
 #pragma once
 
-#include "..\Core\BE.h"
+#include "Core\BE.h"
+#include <climits>
 
 BE_BEGIN
 
@@ -12,6 +13,8 @@ BE_BEGIN
 #define BE_SMALL_NUMBER               (1.e-8f)
 #define BE_KINDA_SMALL_NUMBER   (1.e-4f)
 #define BE_BIG_NUMBER                     (3.4e+38f)
+#define BE_SQRT_TWO                        (1.414213562373095)
 
+static constexpr int32 BE_INT32_MAX = std::numeric_limits<int32>::max();;
 
 BE_END

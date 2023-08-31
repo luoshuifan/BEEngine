@@ -1,5 +1,5 @@
-#include "..\..\include\Geometry\Geometry.h"
-#include "..\..\include\Math\MathUtil.h"
+#include "Geometry\Geometry.h"
+#include "Math\MathUtil.h"
 
 BE_BEGIN
 

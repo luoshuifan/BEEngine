@@ -1,9 +1,9 @@
 #pragma once
-#include "..\Core\BE.h"
-#include "..\Math\MathFwd.h"
-#include "..\Math\Point.h"
-#include "..\Math\Vector.h"
-#include "..\Math\Ray.h"
+#include "Core\BE.h"
+#include "Math\MathFwd.h"
+#include "Math\Point.h"
+#include "Math\Vector.h"
+#include "Math\Ray.h"
 
 
 BE_BEGIN

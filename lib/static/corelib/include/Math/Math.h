@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\Core\BE.h"
+#include "Core\BE.h"
 #include "MathSSE.h"
 
 BE_BEGIN
@@ -18,6 +18,13 @@ struct FMath
 	{
 		return SSE::Sqrt(X);
 	}
+
+	template <typename T>
+	static T Clamp(const T X, const T Min, const T Max)
+	{
+		return X < Min ? Min : X < Max ? X : Max;
+	}
+
 };
 
 BE_END

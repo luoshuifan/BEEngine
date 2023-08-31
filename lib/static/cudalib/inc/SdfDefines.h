@@ -1,5 +1,10 @@
 #pragma once
 #include <cstdint>
+#include "Core\BE.h"
+#include "Math\Math.h"
+#include "Math\MathDefine.h"
+
+BE_BEGIN
 
 enum class ESDFWorker : uint8_t
 {
@@ -9,28 +14,59 @@ enum class ESDFWorker : uint8_t
 
 struct FPoint
 {
-	int32_t dx = 0;
-	int32_t dy = 0;
+	int32 dx = 0;
+	int32 dy = 0;
 
-	float Alpha = 0;
+	float Area = 0;
 	float ddx = 0;
 	float ddy = 0;
 
-	int32_t DistanceSq() const
+	enum EFlag
 	{
-		return dx * dx + dy * dy;
-	}
-};
+		InSide,
+		Out,
+		Mid,
+	}Flag;
 
-constexpr FPoint PointZero{ 0,0 };
-constexpr FPoint PointInf{ 9999, 9999 };
+	float DistanceSq() const
+	{
+		float PixelDistance = 0;
+		if (Flag == EFlag::Mid)
+		{
+			float Area = this->Area;
+			float LeftArea = ddy / ddx;
+
+			if (Area >= 0 && Area <= LeftArea)
+			{
+				PixelDistance = (ddx + ddy) / 2 - FMath::Sqrt(2 * ddx * ddy * Area);
+			}
+			else if (Area >= LeftArea && Area <= 1 - LeftArea)
+			{
+				PixelDistance = (0.5 - Area) * ddx;
+			}
+			else if (Area >= 1 - LeftArea && Area <= 1)
+			{
+				PixelDistance = -(ddx + ddy) / 2 + FMath::Sqrt(2 * ddx * ddy * (1 - Area));
+			}
+		}
+		return dx * dx + dy * dy + PixelDistance;
+	}
+
+	FPoint(int32 InDx, int32 InDy, EFlag InFlag) :
+		dx(InDx), dy(InDy), Flag(InFlag) {}
+
+	FPoint() = default;
+
+	static const FPoint PointZero;
+	static const FPoint PointInf;
+};
 
 class FGrid
 {
 public:
 	FGrid() = default;
 
-	FGrid(const int32_t GridWidth, const int32_t GridHeight) :
+	FGrid(const int32 GridWidth, const int32 GridHeight) :
 		Width(GridWidth),
 		Height(GridHeight),
 		Grid(new FPoint[GridWidth * GridHeight]) {}
@@ -41,31 +77,24 @@ public:
 		GridTmp.Grid = nullptr;
 	}
 
-	void Put(int32_t Position, const FPoint& Point)
+	void Put(int32 Position, const FPoint& Point)
 	{
 		Grid[Position] = Point;
 	}
 
-	FPoint& Get(int32_t Position)
+	FPoint& Get(int32 Position)
 	{
 		return Grid[Position];
 	}
 
-	const FPoint& Get(int32_t Position) const
+	const FPoint& Get(int32 Position) const
 	{
 		return Grid[Position];
 	}
 
-	void Compare(FPoint& Point, int32_t X, int32_t Y, int32_t OffsetX, int32_t OffsetY)
+	void Compare(FPoint& Point, int32 X, int32 Y, int32 OffsetX, int32 OffsetY)
 	{
-		if ((X + OffsetX < 0) || (X + OffsetX >= Width) ||
-			(Y + OffsetY < 0 || (Y + OffsetY >= Height)))
-			return;
-
-		int32_t SafeX = (X + OffsetX);
-		int32_t SafeY = (Y + OffsetY);
-
-		FPoint Neighbor = Get(SafeY * Width + SafeX);
+		FPoint Neighbor = Get(Y * Width + X);
 		Neighbor.dx += OffsetX;
 		Neighbor.dy += OffsetY;
 
@@ -75,17 +104,17 @@ public:
 
 	~FGrid()
 	{
-		delete Grid;
+		delete[] Grid;
 	}
 
 #if SDF_DEBUG
-	void ConvertPNG(int32_t Channels , unsigned char* TextureData)
+	void ConvertPNG(int32 Channels , unsigned char* TextureData)
 	{
-		for (int32_t X = 0; X < Width; ++X)
+		for (int32 X = 0; X < Width; ++X)
 		{
-			for (int32_t Y = 0; Y < Height; ++Y)
+			for (int32 Y = 0; Y < Height; ++Y)
 			{
-				int32_t Position = Y * Height + X;
+				int32 Position = Y * Height + X;
 				if (Grid[Position].DistanceSq() < 1)
 				{
 					TextureData[Position * Channels + 0] = 0;
@@ -108,12 +137,15 @@ public:
 private:
 	FPoint* Grid = nullptr;
 	
-	int32_t Width;
+	int32 Width;
 
-	int32_t Height;
+	int32 Height;
+
 };
 
 inline float Luman(int8_t R, int8_t G, int8_t B)
 {
 
 }
+
+BE_END

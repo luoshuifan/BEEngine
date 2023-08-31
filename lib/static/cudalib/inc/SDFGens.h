@@ -1,5 +1,8 @@
 #pragma once
 #include "SdfDefines.h"
+#include "TextureForward.h"
+
+BE_BEGIN
 
 class FSDFGen
 {
@@ -7,7 +10,7 @@ public:
 	FSDFGen(ESDFWorker Worker = ESDFWorker::CPU) :
 		SDFWorker(Worker) {}
 
-	virtual void GenerateSDF() const = 0;
+	virtual void GenerateSDF(const BEBitMap& BitMap) const = 0;
 
 	ESDFWorker SDFWorker;
 
@@ -18,7 +21,7 @@ class FSDFGenSsedt : public FSDFGen
 {
 public:
 
-	virtual void GenerateSDF() const final;
+	virtual void GenerateSDF(const BEBitMap& BitMap) const final;
 
 private:
 	void FillGrid(
@@ -43,3 +46,5 @@ void GetIsotropicSobel(
 	int32_t Height,
 	FPoint& Point
 );
+
+BE_END

@@ -87,7 +87,7 @@ void FSDFGenSsedt::GenerateSDF(const BEBitMap& BitMap) const
 			SDFTexture[Position * 4 + 3] = 255;
 		});
 
-	SDFBitMap.Save(PROJECTDIRPLUS("/resource/sdf/"));
+	SDFBitMap.Save<ETextureType::BE_PNG>(PROJECTDIRPLUS("/resource/sdf/"));
 
 	//delete[] SDFGrid;
 #endif

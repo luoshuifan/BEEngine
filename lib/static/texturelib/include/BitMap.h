@@ -1,6 +1,8 @@
 #pragma once
 #include "Core\BE.h"
 #include "Texture.h"
+#include "ft2build.h"
+#include FT_FREETYPE_H
 
 BE_BEGIN
 
@@ -24,7 +26,6 @@ public:
 		BETexture(Width, Height, Channels), Name(InName)
 	{	}
 	
-	virtual void Save(const String& Path) const override;
 };
 
 BE_END

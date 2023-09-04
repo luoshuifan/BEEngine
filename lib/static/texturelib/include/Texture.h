@@ -1,18 +1,19 @@
 #pragma once
 #include "Core\BE.h"
-#include "ft2build.h"
-#include FT_FREETYPE_H
+#include "TextureForward.h"
+#include "Math\Vector2.h"
+#include "Math\MathUtil.h"
 
 BE_BEGIN
 
 class BETexture
 {
 public:
-	uint32 Width;
+	int32 Width;
 
-	uint32 Height;
+	int32 Height;
 
-	uint32 Channels;
+	int32 Channels;
 
 	uint8* Buffer;
 
@@ -27,9 +28,30 @@ public:
 
 	void SetTexture(const uint8* Texture);
 
-	virtual void Save(const String& Path) const = 0;
+	void LoadTexture(const String& Path, ETextureType Type = ETextureType::BE_PNG);
+
+	template<ETextureType Type>
+	void Save(const String& Path) const;
+
+	const uint8* ReadPixel(const FVector2& Pos)const
+	{
+		int32 Position = (Pos.Y * Width + Pos.X) * Channels;
+		return Buffer + Position;
+	}
+
+	void SetPixel(const FVector2& Pos, uint8* Data)
+	{
+		int32 Position = (Pos.Y * Width + Pos.X) * Channels;
+		memcpy(Buffer + Position, Data, Channels);
+	}
 
 	virtual ~BETexture();
 };
+
+template<ETextureType Type>
+void BETexture::Save(const String& Path) const
+{
+	StbUtil::SaveTexture<Type>(Path, this);
+}
 
 BE_END

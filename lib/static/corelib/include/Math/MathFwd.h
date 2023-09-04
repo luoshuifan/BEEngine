@@ -17,4 +17,6 @@ using FVector = TVector<float>;
 using FPoint = TPoint<float>;
 using FRay = TRay<float>;
 
+class FVector2;
+
 BE_END

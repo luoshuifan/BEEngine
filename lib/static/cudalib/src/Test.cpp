@@ -313,7 +313,7 @@ void FTTest()
     BEBitMap BitMap = FT.GetGlyphBitMap('A');
 
     String TextureSavePath = PROJECT_DIR + "\\resource\\sdf\\A.png";
-    BitMap.Save(TextureSavePath);
+    BitMap.Save<ETextureType::BE_PNG>(TextureSavePath);
 
     FSDFGen* SDFGen = nullptr;
     SDFGen = new FSDFGenSsedt();

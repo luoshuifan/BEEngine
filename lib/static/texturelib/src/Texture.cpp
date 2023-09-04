@@ -36,5 +36,10 @@ void BETexture::SetTexture(const uint8* Texture)
 	std::memcpy(Buffer, Texture, Width * Height * Channels);
 }
 
+void BETexture::LoadTexture(const String& Path, ETextureType Type)
+{
+
+}
+
 
 BE_END

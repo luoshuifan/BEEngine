@@ -9,4 +9,11 @@ class BEBitMap;
 
 class BETexture;
 
+enum ETextureType
+{
+	BE_PNG,
+	BE_JPEG,
+};
+
+
 BE_END
